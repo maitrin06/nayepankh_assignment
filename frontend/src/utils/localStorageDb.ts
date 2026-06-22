@@ -346,6 +346,21 @@ export const handleMockRequest = async (config: any): Promise<any> => {
     };
   }
 
+  // Auth Endpoint: POST /api/auth/forgot-password
+  if (url.includes('/auth/forgot-password') && method === 'post') {
+    const { email } = data;
+    const userPair = Object.entries(store.users).find(([id, u]: any) => u.email === email);
+    if (!userPair) {
+      return { status: 404, data: { message: 'User with this email does not exist.' } };
+    }
+    return { status: 200, data: { message: 'Recovery link sent successfully! (Mocked)' } };
+  }
+
+  // Auth Endpoint: POST /api/auth/reset-password
+  if (url.includes('/auth/reset-password') && method === 'post') {
+    return { status: 200, data: { message: 'Password reset successfully! (Mocked)' } };
+  }
+
   // 3. Auth Endpoint: POST /api/auth/google
   if (url.includes('/auth/google') && method === 'post') {
     const { email, name, profileImage } = data;
