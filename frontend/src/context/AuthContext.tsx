@@ -4,6 +4,31 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import io, { Socket } from 'socket.io-client';
 import axios from 'axios';
+import { handleMockRequest } from '@/utils/localStorageDb';
+
+const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+
+if (isGitHubPages) {
+  console.log('[VolunteerHub] Running on GitHub Pages. Activating serverless client-side Mock database.');
+  
+  axios.interceptors.request.use(async (config: any) => {
+    try {
+      const mockResponse = await handleMockRequest(config);
+      config.adapter = async () => {
+        return {
+          data: mockResponse.data,
+          status: mockResponse.status,
+          statusText: mockResponse.status === 200 || mockResponse.status === 201 ? 'OK' : 'Error',
+          headers: mockResponse.headers || {},
+          config
+        };
+      };
+    } catch (err) {
+      console.error('Mock request interception failed:', err);
+    }
+    return config;
+  });
+}
 
 // Translation Dictionaries (English & Hindi)
 export const translations: any = {
@@ -134,6 +159,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         socket.disconnect();
         setSocket(null);
       }
+      return;
+    }
+
+    if (isGitHubPages) {
+      console.log('Skipping socket connection on serverless GitHub Pages environment.');
+      fetchNotifications();
       return;
     }
 
