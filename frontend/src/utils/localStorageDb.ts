@@ -245,6 +245,9 @@ const tokenize = (text: string): Set<string> => {
 export const handleMockRequest = async (config: any): Promise<any> => {
   const store = getStore();
   const url = config.url || '';
+  const parsedUrl = new URL(url, 'http://localhost:5000');
+  const path = parsedUrl.pathname;
+  const searchParams = parsedUrl.searchParams;
   const method = (config.method || 'get').toLowerCase();
   const data = config.data ? (typeof config.data === 'string' ? JSON.parse(config.data) : config.data) : {};
 
@@ -408,11 +411,11 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 4. GET /api/volunteers
-  if (url.endsWith('/volunteers') && method === 'get') {
-    const search = config.params?.search?.toLowerCase() || '';
-    const status = config.params?.status?.toLowerCase() || '';
-    const skills = config.params?.skills?.toLowerCase() || '';
-    const location = config.params?.location?.toLowerCase() || '';
+  if (path.endsWith('/volunteers') && method === 'get') {
+    const search = (searchParams.get('search') || config.params?.search || '').toLowerCase();
+    const status = (searchParams.get('status') || config.params?.status || '').toLowerCase();
+    const skills = (searchParams.get('skills') || config.params?.skills || '').toLowerCase();
+    const location = (searchParams.get('location') || config.params?.location || '').toLowerCase();
 
     let list = Object.entries(store.volunteers).map(([id, vol]: any) => {
       return {
@@ -593,7 +596,7 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 10. GET /api/events
-  if (url.endsWith('/events') && method === 'get') {
+  if (path.endsWith('/events') && method === 'get') {
     const eventsList = Object.entries(store.events).map(([id, ev]: any) => {
       const vols = (ev.volunteerIds || []).map((vId: string) => {
         const vol = store.volunteers[vId];
@@ -608,7 +611,7 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 11. POST /api/events
-  if (url.endsWith('/events') && method === 'post') {
+  if (path.endsWith('/events') && method === 'post') {
     const { title, description, date, time, location, capacity, imageUrl } = data;
     const eventId = 'event-' + Math.random().toString(36).substring(7);
     store.events[eventId] = {
@@ -730,7 +733,7 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 16. GET /api/tasks
-  if (url.endsWith('/tasks') && method === 'get') {
+  if (path.endsWith('/tasks') && method === 'get') {
     const tokenStr = config.headers?.Authorization || config.headers?.authorization || '';
     const userId = tokenStr.split('mock-jwt-token-for-')[1] || 'admin-coord';
     const user = store.users[userId] || {};
@@ -758,7 +761,7 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 17. POST /api/tasks
-  if (url.endsWith('/tasks') && method === 'post') {
+  if (path.endsWith('/tasks') && method === 'post') {
     const { title, description, deadline, assignedVolunteerId } = data;
     const taskId = 'task-' + Math.random().toString(36).substring(7);
     store.tasks[taskId] = {
@@ -826,12 +829,12 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 20. GET /api/activity-logs
-  if (url.endsWith('/activity-logs') && method === 'get') {
+  if (path.endsWith('/activity-logs') && method === 'get') {
     return { status: 200, data: store.activityLogs };
   }
 
   // 21. GET /api/notifications
-  if (url.endsWith('/notifications') && method === 'get') {
+  if (path.endsWith('/notifications') && method === 'get') {
     const tokenStr = config.headers?.Authorization || config.headers?.authorization || '';
     const userId = tokenStr.split('mock-jwt-token-for-')[1] || 'volunteer-rahul';
     const list = store.notifications.filter((n: any) => n.userId === userId);
@@ -839,7 +842,7 @@ export const handleMockRequest = async (config: any): Promise<any> => {
   }
 
   // 22. PUT /api/notifications/:id/read
-  if (url.includes('/notifications/') && url.endsWith('/read') && method === 'put') {
+  if (url.includes('/notifications/') && path.endsWith('/read') && method === 'put') {
     const id = url.split('/notifications/')[1].split('/read')[0];
     const noti = store.notifications.find((n: any) => n.id === id);
     if (noti) noti.read = true;
