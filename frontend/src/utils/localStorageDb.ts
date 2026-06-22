@@ -189,8 +189,14 @@ const getStore = () => {
     return SEED_DATA;
   }
   try {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    if (!parsed || typeof parsed !== 'object' || !parsed.users || !parsed.volunteers || !parsed.events || !parsed.tasks || !parsed.certificates) {
+      localStorage.setItem('volunteerhub_db', JSON.stringify(SEED_DATA));
+      return SEED_DATA;
+    }
+    return parsed;
   } catch {
+    localStorage.setItem('volunteerhub_db', JSON.stringify(SEED_DATA));
     return SEED_DATA;
   }
 };
