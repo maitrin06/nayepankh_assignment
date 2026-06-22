@@ -30,7 +30,10 @@ app.use(helmet({
   contentSecurityPolicy: false, // Turn off CSP headers for ease of development/demo
 }));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    'https://maitrin06.github.io'
+  ],
   credentials: true
 }));
 app.use(express.json());
