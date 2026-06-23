@@ -1,0 +1,24 @@
+# Dependencies & Builds
+node_modules/
+dist/
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Firebase service account & Admin keys
+serviceAccountKey.json
+firebase-admin*.json
+*firebase-admin*.json
+
+# Keys & Certificates
+*.pem
+*.key
+
+# Local database state
+firebase_db.json
+
+# Logs
+*.log
+npm-debug.log*
